@@ -61,7 +61,20 @@ class Maze:
                 is_visited[cur_ind] = 1
             else:
                 historic.pop()
-        #  Load patterns for maze display :
+
+    def retorno(self):
+        return self.maze
+
+       
+
+class Maze_show:
+
+    def __init__(self,maze):
+
+        self.cases_img = []
+        self.maze  = maze
+
+         #  Load patterns for maze display :
         img = pg.image.load("cases.png").convert_alpha()
         for i in range(0, 128, 8):
             self.cases_img.append(pg.Surface.subsurface(img, i, 0, 8, 8))

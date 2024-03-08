@@ -14,10 +14,16 @@ class Pheromon:
         #  We add a row of cells at the bottom, top, left, and right to facilitate edge management in vectorized form
         self.pheromon = np.zeros((the_dimensions[0]+2, the_dimensions[1]+2), dtype=np.double)
         self.pheromon[the_food_position[0]+1, the_food_position[1]+1] = 1.
+        
+        #print("inttttttttttttttttt",self.pheromon)
+        
+        
 
     def do_evaporation(self, the_pos_food):
+        #print("antessssssssssssssssssss",self.pheromon)
         self.pheromon = self.beta * self.pheromon
         self.pheromon[the_pos_food[0]+1, the_pos_food[1]+1] = 1.
+        #print("depoisssssssssssssssssss",self.pheromon)
 
     def mark(self, the_position, has_WESN_exits):
         assert(the_position[0] >= 0)
@@ -28,10 +34,18 @@ class Pheromon:
                           self.pheromon[the_position[0], the_position[1]+1] if has_WESN_exits[d.DIR_NORTH] else 0.], dtype=np.double)
         pheromones = np.maximum(cells, 0.)
         self.pheromon[the_position[0]+1, the_position[1]+1] = self.alpha*np.max(pheromones) + (1-self.alpha)*0.25*pheromones.sum()
+        
+        #print("eeeeeeeeeeeeeeeeeeeeeeee",self.pheromon)
+    def return_pheromon(self):
+        return self.pheromon
 
-    def getColor(self, i: int, j: int):
-        val = max(min(self.pheromon[i, j], 1), 0)
+class Pheromon_show:
+    def __init__(self, pheromon):
+        self.pheromon= pheromon
+
+    def getColor(self, i: int, j: int,pheromon_recv):
+        val = max(min(pheromon_recv[i, j], 1), 0)
         return [255*(val > 1.E-16), 255*val, 128.]
 
-    def display(self, screen):
-        [[screen.fill(self.getColor(i, j), (8*(j-1), 8*(i-1), 8, 8)) for j in range(1, self.pheromon.shape[1]-1)] for i in range(1, self.pheromon.shape[0]-1)]
+    def display(self, screen,pheromon_recv):
+        [[screen.fill(self.getColor(i, j,pheromon_recv), (8*(j-1), 8*(i-1), 8, 8)) for j in range(1, pheromon_recv.shape[1]-1)] for i in range(1, pheromon_recv.shape[0]-1)]
