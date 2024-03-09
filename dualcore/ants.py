@@ -1,5 +1,5 @@
 """
-Module managing an ant colony in a labyrinth.
+Module managing an ant colony in a labyrinth
 """
 import numpy as np
 import maze
