@@ -269,6 +269,8 @@ if __name__ == "__main__":
         ants_show = Colony_show()
         pherom_recv = comm.recv(source=1, tag=4)
         pherom_show = pheromone.Pheromon_show(pherom_recv)
+        fps=[]
+        counter = 0
 
     if rank > 0:
         
@@ -294,7 +296,6 @@ if __name__ == "__main__":
         directions = ants.directions
         historic_path = ants.historic_path
         age = ants.age
-
         comm.send(directions, dest=0, tag=1)
         comm.send(historic_path, dest=0, tag=2)
         comm.send(age, dest=0, tag=3)
@@ -308,33 +309,33 @@ if __name__ == "__main__":
                     exit(0)
 
             deb = time.time()
-
-            pheromon_recv = comm.recv(source=1, tag=7)
-            #print(pheromon_recv)
+           
+            pheromon_recv,primeiro,food_counter = comm.recv(source=1)
+            directions_recv, historic_path_recv, age_recv = primeiro
             pherom_show.display(screen,pheromon_recv)
 
             screen.blit(mazeImg, (0, 0))
-            directions_recv, historic_path_recv, age_recv = comm.recv(source=1, tag=6)
             ants_show.display(screen,directions_recv, historic_path_recv, age_recv)  
             
             pg.display.update()
                    
-            food_counter = comm.recv(source=1, tag=5)
             end = time.time()
             if food_counter == 1 and not snapshop_taken:
                 pg.image.save(screen, "MyFirstFood.png")
                 snapshop_taken = True
             # pg.time.wait(500)
-            print(f"FPS : {1./(end-deb):6.2f}, nourriture : {food_counter:7d}", end='\r')
+            fps.append(int(1./(end-deb)))
+            counter += 1
+            print(f"FPS : {1./(end-deb):6.2f}, nourriture : {food_counter:7d}, averege fps: {np.sum(fps)/counter}", end='\r')
+
 
         if rank > 0:
+
             food_counter = ants.advance(a_maze, pos_food, pos_nest, pherom, food_counter)
             mise_a_jour = ants.returns()
             
             pheromon_send=pherom.return_pheromon()
-            comm.send(pheromon_send, dest=0, tag=7)
-            comm.send(mise_a_jour, dest=0, tag=6)
-            comm.send(food_counter, dest=0, tag=5)
-
+            send = (pheromon_send, mise_a_jour, food_counter)
+            comm.send(send, dest=0)
             
             pherom.do_evaporation(pos_food)
